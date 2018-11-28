@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    let itemArray = ["Grocery Store", "Target", "PTA"]
+    var itemArray = ["Grocery Store", "Target", "PTA"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,6 +44,48 @@ class TodoListViewController: UITableViewController {
             tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         }
         
+    }
+    //MARK - add new items
+    
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New ToDo Item", message: "", preferredStyle: .alert
+        )
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action ) in
+            // what will happen when the user clicks the add item button on UIAlert
+            print(textField.text)
+            if textField.text != ""
+            {
+                print("field isn't empty")
+            self.itemArray.append(textField.text ?? "")
+            self.tableView.reloadData()
+            }
+        }
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            textField = alertTextField
+        }
+            alert.addAction(action)
+        
+            present(alert, animated: true, completion: nil)
+        
+        
+    }
+    
+    // try and allow swipe for delete
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if (editingStyle == .delete) {
+            print("ready to delete")
+            // handle delete (by removing the data from your array and updating the tableview)
+            itemArray.remove(at: indexPath.row)
+            tableView.reloadData()
+            print(itemArray)
+        }
     }
     
 }
