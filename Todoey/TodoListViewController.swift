@@ -11,10 +11,14 @@ import UIKit
 class TodoListViewController: UITableViewController {
     
     var itemArray = ["Grocery Store", "Target", "PTA"]
+    let defaults = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        if let items = UserDefaults.standard.array(forKey: "ToDoListArray") as? [String] {
+            itemArray = items
+        }
     }
 
 //MARK -Tableview Datasource Methods
@@ -59,6 +63,7 @@ class TodoListViewController: UITableViewController {
             {
                 print("field isn't empty")
             self.itemArray.append(textField.text ?? "")
+                self.defaults.set(self.itemArray, forKey: "ToDoListArray")
             self.tableView.reloadData()
             }
         }
@@ -84,7 +89,8 @@ class TodoListViewController: UITableViewController {
             // handle delete (by removing the data from your array and updating the tableview)
             itemArray.remove(at: indexPath.row)
             tableView.reloadData()
-            print(itemArray)
+            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
+            
         }
     }
     
