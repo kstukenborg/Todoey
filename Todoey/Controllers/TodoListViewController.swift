@@ -7,12 +7,14 @@
 //
 
 import UIKit
+import CoreData
+
 
 class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
-    
+   let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
    //let defaults = UserDefaults.standard
 
@@ -20,7 +22,9 @@ class TodoListViewController: UITableViewController {
         super.viewDidLoad()
         
        print(dataFilePath)
-       loadItems()
+        loadItems()
+        
+      // loadItems()
       //  let newItem = Item()
       //  newItem.title = "PTSA"
       //  newItem.done = true
@@ -87,11 +91,13 @@ class TodoListViewController: UITableViewController {
             
             if textField.text != ""
             {
-                let newItem1 = Item()
-                newItem1.title = textField.text ?? ""
-                newItem1.done = false
-                print(newItem1)
-            self.itemArray.append(newItem1)
+                
+                
+                let newItem = Item(context: self.context)
+                newItem.title = textField.text ?? ""
+                newItem.done = false
+                
+            self.itemArray.append(newItem)
                 self.saveItems()
                 
                 
@@ -114,17 +120,17 @@ class TodoListViewController: UITableViewController {
     //MARK - Model Manipulation Methods
     
     func saveItems() {
-        let encoder = PropertyListEncoder()
+        
         do {
-            let data =  try  encoder.encode(itemArray)
-            try data.write(to: dataFilePath! )
+           try context.save()
+            
         } catch {
-            print("error encoding item array, \(error)")
+            print("error saving context array, \(error)")
         }
         self.tableView.reloadData()
     }
     
-    func loadItems() {
+    /* func loadItems() {
         if let data = try? Data(contentsOf: dataFilePath!) {
             let decoder = PropertyListDecoder()
             do {
@@ -133,6 +139,17 @@ class TodoListViewController: UITableViewController {
                 print("Error decoding item \(error)")
             }
     }
+    } */
+    
+    func loadItems() {
+        let request : NSFetchRequest<Item> =  Item.fetchRequest()
+        do {
+            try itemArray = context.fetch(request) //blank and so it will bring it all back
+            print("Fetching items")
+    }
+        catch {
+            print("error fetching data from context \(error)")
+        }
     }
     // try and allow swipe for delete
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
@@ -144,8 +161,10 @@ class TodoListViewController: UITableViewController {
         if (editingStyle == .delete) {
             print("ready to delete")
             // handle delete (by removing the data from your array and updating the tableview)
+            
+            
+            context.delete(itemArray[indexPath.row])
             itemArray.remove(at: indexPath.row)
-            tableView.reloadData()
             saveItems() 
            // self.defaults.set(self.itemArray, forKey: "ToDoListArray")
             
